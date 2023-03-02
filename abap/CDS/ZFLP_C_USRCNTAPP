@@ -1,0 +1,42 @@
+@AbapCatalog.sqlViewName: 'ZFLPUSRCNTAPP'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Number of users accessed application'
+
+@OData.publish: true
+@UI.chart: [{
+    qualifier: 'F3',
+    title: 'Total user count',
+    chartType: #DONUT,
+    dimensions: ['app_title'],
+    measures: ['total_users'],
+    dimensionAttributes: [{ dimension: 'app_title', role: #CATEGORY }],
+    measureAttributes: [{ measure: 'total_users', role: #AXIS_1, asDataPoint: true }]
+}]
+define view ZFLP_C_USRCNTAPP as select from ZFLP_I_USRCNTAPP {
+    key flpappkey, 
+    
+    @EndUserText.label: 'App title'
+    @UI.lineItem: [{ position: 10, label: 'App title', qualifier: 'F3'}]
+    @UI.selectionField.position: 10
+    app_title,
+    
+    @UI.dataPoint:{
+              title: 'Total Users',
+              criticalityCalculation:{
+                improvementDirection: #TARGET,
+                deviationRangeHighValue: 2000, // Just Playing around with some numbers here...
+                toleranceRangeLowValue: 50 // Just Playing around with some numbers here...
+              }
+         }
+    @EndUserText.label: 'Total Users'
+    @UI.lineItem: [{position: 20, label: 'Total User', qualifier: 'F3', type: #AS_DATAPOINT}]
+    total_users,
+    
+    @EndUserText.label: 'Last Accessed'
+    @UI.lineItem: [{position: 30, label: 'Last Accessed', qualifier: 'F3'}]
+    @UI.selectionField.position: 30
+    last_accessed as logon_date
+      
+}

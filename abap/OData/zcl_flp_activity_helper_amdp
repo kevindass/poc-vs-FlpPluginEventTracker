@@ -1,0 +1,108 @@
+CLASS zcl_flp_activity_helper_amdp DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+  INTERFACES IF_AMDP_MARKER_HDB.
+
+  CLASS-METHODS purge_userdata
+    IMPORTING VALUE(i_fromDate)     TYPE sy-datum
+    EXPORTING VALUE(e_updated_rows) TYPE i.
+  CLASS-METHODS delete_userdata
+    IMPORTING VALUE(i_fromDate) TYPE sy-datum.
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+ENDCLASS.
+
+
+
+CLASS zcl_flp_activity_helper_amdp IMPLEMENTATION.
+METHOD purge_userdata
+BY DATABASE PROCEDURE
+FOR HDB
+LANGUAGE SQLSCRIPT
+USING zflpusractaggr zflpactaggr.
+
+DECLARE lv_data_rows INTEGER;
+
+*Get data to be purged
+lt_usractaggr = SELECT mandt,
+                      sem_obj,
+                      sem_obj_action,
+                      app_title,
+                      udate,
+                      utime,
+                      hits
+                FROM zflpusractaggr
+                WHERE udate <= i_fromDate;
+
+lv_data_rows = ::ROWCOUNT;
+
+IF (:lv_data_rows >0 )
+THEN
+lt_actaggr = SELECT mandt,
+                    sem_obj,
+                    sem_obj_action,
+                    app_title,
+                    SUM( HITS ) as hits,
+                    MAX( udate ) as udate
+             FROM :lt_usractaggr
+             GROUP BY  mandt,
+                       sem_obj,
+                       sem_obj_action,
+                       app_title;
+
+lt_actaggr_union = SELECT mandt,
+                       sem_obj,
+                       sem_obj_action,
+                       app_title,
+                       hits,
+                       udate FROM zflpactaggr
+                       UNION ALL SELECT mandt,
+                                        sem_obj,
+                                        sem_obj_action,
+                                        app_title,
+                                        hits,
+                                        udate FROM :lt_actaggr;
+
+lt_purgedata = SELECT mandt,
+                     sem_obj,
+                     sem_obj_action,
+                     app_title,
+                     sum(hits) as hits,
+                     MAX( udate ) as udate
+               FROM :lt_actaggr_union
+               GROUP BY mandt,
+                       sem_obj,
+                       sem_obj_action,
+                       app_title;
+
+UPSERT zflpactaggr
+    (    mandt,
+         sem_obj,
+         sem_obj_action,
+         app_title,
+         hits,
+         udate )
+     SELECT * FROM :lt_purgedata;
+
+ e_updated_rows = ::ROWCOUNT;
+ELSE
+    e_updated_rows = 0;
+END IF;
+
+ENDMETHOD.
+
+METHOD delete_userdata
+BY DATABASE PROCEDURE
+FOR HDB
+LANGUAGE SQLSCRIPT
+USING zflpusractaggr.
+
+DELETE FROM zflpusractaggr
+WHERE udate <= i_fromDate;
+
+ENDMETHOD.
+
+ENDCLASS.

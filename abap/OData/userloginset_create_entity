@@ -1,0 +1,43 @@
+  METHOD userloginset_create_entity.
+*------------------------------------------------------------------------*
+* Modification   : App Usage vol-2                                       *
+* ChaRM #        : 9000012673                                            *
+* Workinitiation : TR04921 SAP Insight Portal to SAP FIORI               *
+* Description    : Fiori Tracker: User login                             *
+* FSPEC ID       : NA                                                    *
+*------------------------------------------------------------------------*
+*                      Modification Log(Latest Version on Top)
+*------------------------------------------------------------------------*
+* Changed On     :                                                       *
+* Changed By     :                                                       *
+* Modification   :                                                       *
+* ChaRM #        :                                                       *
+* Workinitiation :                                                       *
+* Description    :                                                       *
+* FSPEC ID       :                                                       *
+*------------------------------------------------------------------------*
+    DATA ls_entity    TYPE zcl_zflp_tracker_mpc=>ts_userlogin.
+    DATA ls_usrlogin  TYPE zflpusrlogin.
+
+    TRY.
+        CALL METHOD io_data_provider->read_entry_data
+          IMPORTING
+            es_data = ls_entity.
+      CATCH /iwbep/cx_mgw_tech_exception .
+    ENDTRY.
+
+    ls_usrlogin = CORRESPONDING #( ls_entity ).
+
+    UPDATE zflpusrlogin
+    SET   utime = sy-uzeit
+          browser = ls_usrlogin-browser
+    WHERE user_name = sy-uname
+      AND udate     = sy-datum..
+    IF sy-subrc NE 0.
+      ls_usrlogin-user_name  = sy-uname.
+      ls_usrlogin-udate      = sy-datum.
+      ls_usrlogin-utime      = sy-uzeit.
+      MODIFY zflpusrlogin FROM ls_usrlogin.
+    ENDIF.
+
+  ENDMETHOD.

@@ -1,0 +1,46 @@
+@AbapCatalog.sqlViewName: 'ZFLPUSRCNT'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Number of users logged on by date'
+
+@OData.publish: true
+@UI.chart: [{
+    qualifier: 'F2',
+    title: 'Total user count',
+    chartType: #DONUT,
+    dimensions: ['logon_date'],
+    measures: ['total_users'],
+    dimensionAttributes: [{ dimension: 'logon_date', role: #CATEGORY }],
+    measureAttributes: [{ measure: 'total_users', role: #AXIS_1, asDataPoint: true }]
+}]
+define view ZFLP_C_USRCNT as select from ZFLP_I_USRCNT {
+    @Consumption.semanticObject: 'logon_date'
+    @EndUserText.label: 'Date'
+    @UI.lineItem: [
+        { position: 10, 
+          label: 'Date', 
+          qualifier: 'F2'
+        }, 
+        {
+          type: #FOR_INTENT_BASED_NAVIGATION, 
+          semanticObjectAction: 'display'
+        }
+     ]
+    @UI.selectionField.position: 10
+    key logon_date as logon_date,
+    
+    @UI.dataPoint:{
+              title: 'Total Users',
+              criticalityCalculation:{
+                improvementDirection: #TARGET,
+                deviationRangeHighValue: 2000, // Just Playing around with some numbers here...
+                toleranceRangeLowValue: 50 // Just Playing around with some numbers here...
+              }
+         }
+    @EndUserText.label: 'Total Users'
+    @UI.lineItem: [{position: 20, label: 'Total User', qualifier: 'F2', type: #AS_DATAPOINT}]
+    count(*) as total_users
+
+        
+}group by logon_date

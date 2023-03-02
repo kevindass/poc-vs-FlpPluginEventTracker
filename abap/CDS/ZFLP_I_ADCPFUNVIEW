@@ -1,0 +1,11 @@
+@AbapCatalog.sqlViewName: 'ZFLPIADCPFUNVIEW'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'User Business Address Services- Function View'
+define view ZFLP_I_ADCPFUNVIEW as select from adcp {
+    key addrnumber,
+    key persnumber,
+    function,
+    substring( function, 1, 3) as functionFirst3Char 
+}

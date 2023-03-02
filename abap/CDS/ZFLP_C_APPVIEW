@@ -1,0 +1,50 @@
+@AbapCatalog.sqlViewName: 'ZFLPAPPVIEW'
+@AbapCatalog.compiler.compareFilter: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'FLP Usage of Appliactions'
+
+@OData.publish: true
+@UI.chart: [{
+    qualifier: 'F1',
+    title: 'Tiles usage view',
+    chartType: #DONUT,
+    dimensions: ['tile'],
+    measures: ['total_hits'],
+    dimensionAttributes: [{ dimension: 'tile', role: #CATEGORY }],
+    measureAttributes: [{ measure: 'total_hits', role: #AXIS_1, asDataPoint: true }]
+}]
+define view ZFLP_C_APPVIEW
+  as select from ZFLP_I_APPVIEW
+{
+      @EndUserText.label: 'App Key'
+  key flpappkey,
+      @UI.selectionField.position: 10
+      @EndUserText.label: 'Semantic Object'
+      sem_obj,
+
+      @EndUserText.label: 'Fiori Tile'
+      @UI.lineItem: [{ position: 10, label: 'Fiori Tile', qualifier: 'F1'}]
+      @UI.selectionField.position: 20
+      app_title  as tile,
+      @UI.dataPoint:{
+              title: 'Total Hits',
+              criticalityCalculation:{
+                improvementDirection: #TARGET,
+                deviationRangeHighValue: 2000, // Just Playing around with some numbers here...
+                toleranceRangeLowValue: 50 // Just Playing around with some numbers here...
+              }
+         }
+      @EndUserText.label: 'Total Hits'
+      @UI.lineItem: [{position: 20, label: 'Total Hits', qualifier: 'F1', type: #AS_DATAPOINT}]
+      sum(hits)  as total_hits,
+
+      @EndUserText.label: 'Last Accessed'
+      @UI.lineItem: [{position: 30, label: 'Last Accessed', qualifier: 'F1'}]
+      @UI.selectionField.position: 30
+      max(udate) as last_accessed
+
+}
+group by
+  flpappkey,
+  app_title,
+  sem_obj

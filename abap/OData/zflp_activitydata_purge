@@ -1,0 +1,100 @@
+*&---------------------------------------------------------------------*
+*& Report zflp_activitydata_purge
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zflp_activitydata_purge.
+
+DATA lox_amdp_version_error TYPE REF TO cx_amdp_version_error.
+DATA lox_amdp_creation_error TYPE REF TO cx_amdp_creation_error.
+DATA lox_amdp_execution_error TYPE REF TO cx_amdp_execution_error.
+DATA lox_amdp_connection_error TYPE REF TO cx_amdp_connection_error.
+
+DATA lv_fromdate TYPE sy-datum.
+DATA lv_usrfromdate TYPE sy-datum.
+DATA lv_updated_rows TYPE i.
+
+SELECTION-SCREEN BEGIN OF BLOCK b1 WITH FRAME TITLE TEXT-001.
+PARAMETERS p_days TYPE i OBLIGATORY.
+SELECTION-SCREEN END OF BLOCK b1.
+
+SELECTION-SCREEN BEGIN OF BLOCK b2 WITH FRAME TITLE TEXT-002.
+PARAMETERS p_udays TYPE i OBLIGATORY.
+SELECTION-SCREEN END OF BLOCK b2.
+
+*--------------------------------------------------------------------*
+* Apps Usage
+*--------------------------------------------------------------------*
+lv_fromdate = sy-datum - p_days.
+
+FORMAT INTENSIFIED COLOR = 3.
+WRITE: 'ZFLPUSRACTAGGR'.
+FORMAT INTENSIFIED COLOR = 0.
+WRITE: / 'Purge data older than(days):', p_days.
+WRITE: / 'Purge data less than equal to ', lv_fromdate DD/MM/YYYY.
+TRY.
+    CALL METHOD zcl_flp_activity_helper_amdp=>purge_userdata
+      EXPORTING
+        i_fromdate     = lv_fromdate
+      IMPORTING
+        e_updated_rows = lv_updated_rows.
+  CATCH cx_amdp_version_error INTO lox_amdp_version_error.
+    DATA(lv_txt) = lox_amdp_version_error->get_longtext( ).
+  CATCH cx_amdp_creation_error INTO lox_amdp_creation_error.
+    lv_txt = lox_amdp_creation_error->get_longtext( ).
+  CATCH cx_amdp_execution_error INTO lox_amdp_execution_error.
+    lv_txt = lox_amdp_execution_error->get_longtext( ).
+  CATCH cx_amdp_connection_error INTO lox_amdp_connection_error.
+    lv_txt = lox_amdp_connection_error->get_longtext( ).
+ENDTRY.
+
+IF lv_updated_rows EQ 0.
+  WRITE / 'No data found for purging for given date'.
+ELSE.
+  IF lv_txt IS INITIAL.
+    lv_txt = 'Data load into "App activity aggregated data" was successfull'.
+  ENDIF.
+
+  WRITE / lv_txt.
+
+  CLEAR lv_txt.
+
+  TRY.
+      CALL METHOD zcl_flp_activity_helper_amdp=>delete_userdata
+        EXPORTING
+          i_fromdate = lv_fromdate.
+    CATCH cx_amdp_version_error INTO lox_amdp_version_error.
+      lv_txt = lox_amdp_version_error->get_longtext( ).
+    CATCH cx_amdp_creation_error INTO lox_amdp_creation_error.
+      lv_txt = lox_amdp_creation_error->get_longtext( ).
+    CATCH cx_amdp_execution_error INTO lox_amdp_execution_error.
+      lv_txt = lox_amdp_execution_error->get_longtext( ).
+    CATCH cx_amdp_connection_error INTO lox_amdp_connection_error.
+      lv_txt = lox_amdp_connection_error->get_longtext( ).
+  ENDTRY.
+
+  IF lv_txt IS INITIAL.
+    lv_txt = 'Purge was successfull for "User activity aggregated data"'.
+  ENDIF.
+
+  WRITE / lv_txt.
+ENDIF.
+
+*--------------------------------------------------------------------*
+* User Login
+*--------------------------------------------------------------------*
+lv_usrfromdate = sy-datum - p_udays.
+
+WRITE: sy-uline.
+FORMAT INTENSIFIED COLOR = 4.
+WRITE: / 'ZFLPUSRLOGIN'.
+FORMAT INTENSIFIED COLOR = 0.
+WRITE: / 'Delete data older than(days):', p_udays.
+WRITE: / 'Delete data less than equal to ', lv_usrfromdate DD/MM/YYYY.
+
+DELETE FROM zflpusrlogin WHERE udate LE lv_usrfromdate.
+IF sy-subrc EQ 0.
+  WRITE / 'Delete was successfull for "User Login data"'.
+ELSE.
+  WRITE / 'No data found for deletion for given date'.
+ENDIF.

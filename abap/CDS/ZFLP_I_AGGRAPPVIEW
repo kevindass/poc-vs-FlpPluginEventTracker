@@ -1,0 +1,12 @@
+@AbapCatalog.sqlViewName: 'ZFLPIAGGRAPPVIEW'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Usage of Fiori Applications(non-user)'
+define view ZFLP_I_AGGRAPPVIEW as select from zflpactaggr as aggr {
+ key concat ( aggr.sem_obj, concat('-' ,aggr.sem_obj_action) ) as flpappkey, 
+ LOWER(aggr.sem_obj) as sem_obj,
+ aggr.hits,
+ aggr.udate, 
+ aggr.app_title
+}

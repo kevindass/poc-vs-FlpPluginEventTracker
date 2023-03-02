@@ -1,0 +1,32 @@
+@AbapCatalog.sqlViewName: 'ZFLPIUSRADCP'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'User Business Address Services'
+
+//User are deleted from USR* tables when not with business
+//(Valid for Prod systems only)
+define view ZFLP_I_USRADCP as select from usr21 as usr21 
+association [0..1] to ZFLP_I_ADCPFUNVIEW as _adcpFunView
+on usr21.addrnumber = _adcpFunView.addrnumber
+and usr21.persnumber = _adcpFunView.persnumber
+association [0..1] to adr6 as _adr6
+ on usr21.addrnumber = _adr6.addrnumber
+and usr21.persnumber = _adr6.persnumber{
+   key usr21.bname,
+       usr21.persnumber,
+       usr21.addrnumber,
+       case _adcpFunView.functionFirst3Char 
+            when 'LBI' then 'LBI'
+            when 'CON' then 'LBI'
+            when 'VLY' then 'LBI'
+            when 'MST' then 'LBI'
+            when 'IQN' then 'LBI'
+            when 'VND' then _adcpFunView.functionFirst3Char
+            when ''    then 'LBI'
+            else _adcpFunView.functionFirst3Char
+       end as userType,
+       _adcpFunView.function as    function ,
+       _adr6.smtp_addr 
+   
+}

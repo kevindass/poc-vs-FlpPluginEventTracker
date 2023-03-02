@@ -1,0 +1,15 @@
+@AbapCatalog.sqlViewName: 'ZFLPIUSRAPPVIEW'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Usage of Fiori Applications by user'
+
+define view ZFLP_I_USRAPPVIEW as select from zflpusractaggr as usrAggr{
+ key concat ( usrAggr.sem_obj, concat('-' ,usrAggr.sem_obj_action) ) as flpappkey, 
+ LOWER(usrAggr.sem_obj) as sem_obj,
+ usrAggr.user_name, 
+ usrAggr.hits,
+ usrAggr.udate, 
+ usrAggr.utime, 
+ usrAggr.app_title
+}

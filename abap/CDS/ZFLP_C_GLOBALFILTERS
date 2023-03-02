@@ -1,0 +1,24 @@
+@AbapCatalog.sqlViewName: 'ZFLPGBLFLTR'
+@AbapCatalog.compiler.compareFilter: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Global Filter for Fiori Tracker OVP'
+@OData.publish: true
+define view ZFLP_C_GLOBALFILTERS
+  as select from ZFLP_I_USRCNTAPP
+{
+      @UI.selectionField.position: 10
+      @EndUserText.label: 'App Key'
+  key flpappkey,
+
+      @EndUserText.label: 'Fiori Tile'
+      @UI.lineItem: [{ position: 20, label: 'Fiori Tile'}]
+      @UI.selectionField.position: 20
+      app_title,
+
+      @UI.lineItem: [{ position: 30, label: 'Last Accessed'}]
+      @UI.selectionField.position: 30
+      @EndUserText.label: 'Last Accessed'
+      last_accessed as logon_date
+
+
+}

@@ -1,0 +1,57 @@
+  METHOD useractivityset_create_entity.
+*------------------------------------------------------------------------*
+* Modification   : App Usage vol-1                                       *
+* ChaRM #        : 9000012673                                            *
+* Workinitiation : TR04921 SAP Insight Portal to SAP FIORI               *
+* Description    : Fiori Tracker: User Activity logs                     *
+* FSPEC ID       : NA                                                    *
+*------------------------------------------------------------------------*
+*                      Modification Log(Latest Version on Top)
+*------------------------------------------------------------------------*
+* Changed On     :                                                       *
+* Changed By     :                                                       *
+* Modification   :                                                       *
+* ChaRM #        :                                                       *
+* Workinitiation :                                                       *
+* Description    :                                                       *
+* FSPEC ID       :                                                       *
+*------------------------------------------------------------------------*
+    DATA lv_datetimestamp TYPE timestamp.
+    DATA ls_entity        TYPE zcl_zflp_tracker_mpc=>ts_useractivity.
+    DATA ls_usractivity   TYPE zflpusractaggr.
+
+    TRY.
+        CALL METHOD io_data_provider->read_entry_data
+          IMPORTING
+            es_data = ls_entity.
+      CATCH /iwbep/cx_mgw_tech_exception .
+    ENDTRY.
+
+    ls_usractivity = CORRESPONDING #( ls_entity ).
+    DATA(lv_targetmapping) = substring_before( val = ls_entity-targetmapping sub = '?' ).
+    IF lv_targetmapping IS INITIAL.
+      lv_targetmapping = ls_entity-targetmapping.
+    ENDIF.
+
+
+    DATA(lv_sem_obj)  = substring_before( val = lv_targetmapping sub = '-' ).
+    DATA(lv_sem_obj_action) = substring_after(  val = lv_targetmapping sub = '-' ).
+
+    UPDATE zflpusractaggr
+    SET hits  = hits + 1
+        udate = sy-datum
+        utime = sy-uzeit
+    WHERE user_name  = sy-uname
+      AND  sem_obj    = lv_sem_obj
+      AND  sem_obj_action =  lv_sem_obj_action.
+    IF sy-subrc NE 0.
+      ls_usractivity-user_name  = sy-uname.
+      ls_usractivity-udate      = sy-datum.
+      ls_usractivity-utime      = sy-uzeit.
+      ls_usractivity-sem_obj        = lv_sem_obj.
+      ls_usractivity-sem_obj_action = lv_sem_obj_action.
+      ls_usractivity-hits = 1.
+      MODIFY zflpusractaggr FROM ls_usractivity.
+    ENDIF.
+
+  ENDMETHOD.

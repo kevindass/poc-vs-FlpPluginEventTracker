@@ -1,0 +1,16 @@
+@AbapCatalog.sqlViewName: 'ZFLPIUSRCNTAPP'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Number of users per application'
+define view ZFLP_I_USRCNTAPP as select from ZFLP_I_USRAPPVIEW
+as usrAppView
+association[0..1] to ZFLP_I_USRADCP as usrAdcp
+on usrAppView.user_name = usrAdcp.bname
+{
+    key usrAppView.flpappkey,
+        usrAppView.app_title,
+    max(udate) as last_accessed,
+    count(*)   as total_users
+}group by usrAppView.flpappkey,
+          usrAppView.app_title

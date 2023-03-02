@@ -1,0 +1,25 @@
+@AbapCatalog.sqlViewName: 'ZFLPIUSRCNT'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Number of users who logged on'
+define view ZFLP_I_USRCNT as select from zflpusrlogin
+as usrLogin
+association [0..1] to ZFLP_I_USRADCP as usrAdcp
+on usrLogin.user_name = usrAdcp.bname
+{
+    key usrLogin.user_name,
+        usrLogin.udate as logon_date,
+        case usrLogin.browser
+            when 'an' then 'Android'
+            when 'cr' then 'Chrome'
+            when 'ed' then 'Edge'
+            when 'ff' then 'Firefox'
+            when 'ie' then 'Internet Explorer'
+            when 'sf' then 'Safari'
+            else ''
+         end as browser,
+        usrAdcp.userType,
+        usrAdcp.function,
+        usrAdcp.smtp_addr 
+}

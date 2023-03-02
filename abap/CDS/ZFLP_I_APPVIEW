@@ -1,0 +1,22 @@
+@AbapCatalog.sqlViewName: 'ZFLPIAPPVIEW'
+@AbapCatalog.compiler.compareFilter: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Usage of Fiori Applications'
+define view ZFLP_I_APPVIEW as
+select from ZFLP_I_USRAPPVIEW
+{
+ key flpappkey, 
+     sem_obj,
+     app_title, 
+     hits,
+     udate  
+}
+union all
+select from ZFLP_I_AGGRAPPVIEW
+{
+ key flpappkey, 
+     sem_obj,
+     app_title, 
+     hits,
+     udate  
+} 

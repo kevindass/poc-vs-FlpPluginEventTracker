@@ -1,0 +1,46 @@
+@AbapCatalog.sqlViewName: 'ZFLPUSERLOG'
+@AbapCatalog.compiler.compareFilter: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'User log for particular date'
+@OData.publish: true
+define view ZFLP_C_USERLOG
+  as select distinct from ZFLP_I_USRCNT
+{
+       @EndUserText.label: 'Logon Date'
+       @UI.lineItem: [{position: 10, label: 'Logon Date'}]
+       @UI.selectionField.position: 10
+  key  logon_date      as logon_date,
+
+       @EndUserText.label: 'User Name'
+       @UI.lineItem: [{position: 20, label: 'User Name'}]
+       @UI.selectionField.position: 20
+  key  user_name,
+
+       @EndUserText.label: 'User Type'
+       @UI.lineItem: [{ position: 30, label: 'User Type' }]
+       @UI.selectionField.position: 30
+       userType,
+       
+       @EndUserText.label: 'Function'
+       @UI.lineItem: [{position: 40, label: 'Function'}]
+       @UI.selectionField.position: 40
+       function,
+       
+       @EndUserText.label: 'E-mail'
+       @UI.lineItem: [{position: 50, label: 'E-mail' }]
+       @UI.selectionField.position: 50
+       smtp_addr,
+       
+       @EndUserText.label: 'Browser'
+       @UI.lineItem: [{position: 60, label: 'Browser'}]
+       @UI.selectionField.position: 60 
+       browser
+       
+}
+group by
+  user_name,
+  logon_date,
+  userType,
+  function,
+  smtp_addr,
+  browser
