@@ -1,21 +1,4 @@
   METHOD useractivityset_create_entity.
-*------------------------------------------------------------------------*
-* Modification   : App Usage vol-1                                       *
-* ChaRM #        : 9000012673                                            *
-* Workinitiation : TR04921 SAP Insight Portal to SAP FIORI               *
-* Description    : Fiori Tracker: User Activity logs                     *
-* FSPEC ID       : NA                                                    *
-*------------------------------------------------------------------------*
-*                      Modification Log(Latest Version on Top)
-*------------------------------------------------------------------------*
-* Changed On     :                                                       *
-* Changed By     :                                                       *
-* Modification   :                                                       *
-* ChaRM #        :                                                       *
-* Workinitiation :                                                       *
-* Description    :                                                       *
-* FSPEC ID       :                                                       *
-*------------------------------------------------------------------------*
     DATA lv_datetimestamp TYPE timestamp.
     DATA ls_entity        TYPE zcl_zflp_tracker_mpc=>ts_useractivity.
     DATA ls_usractivity   TYPE zflpusractaggr.
